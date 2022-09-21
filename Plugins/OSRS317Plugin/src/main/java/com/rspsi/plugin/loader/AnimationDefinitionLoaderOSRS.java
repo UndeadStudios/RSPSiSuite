@@ -116,7 +116,26 @@ public class AnimationDefinitionLoaderOSRS extends AnimationDefinitionLoader {
 				for (int i = 0; i < len; i++) {
 					buffer.skip(3);
 				}
-			
+			} else if(opcode == 14){
+				buffer.readInt();
+			} else if (opcode == 15) {
+				int len = buffer.readUShort();
+
+				for (int i = 0; i < len; i++) {
+					buffer.readUShort();
+					buffer.skip(3);
+				}
+			} else if(opcode == 16) {
+				buffer.readUShort();
+				buffer.readUShort();
+			} else if(opcode == 17) {
+				int len = buffer.readUByte();
+
+				for (int i = 0; i < len; i++) {
+					buffer.readUByte();
+				}
+			} else if(opcode == 127){
+
 			} else {
 				System.out.println("Error unrecognised seq config code: " + opcode);
 			}
