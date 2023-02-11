@@ -118,8 +118,8 @@ public class MyObjectDefinitionLoader extends ObjectDefinitionLoader {
 				}
 				definition.setOriginalColours(originalColours);
 				definition.setReplacementColours(replacementColours);
-			} else if (opcode == 60) {
-				definition.setMinimapFunction(buffer.readUShort());
+			} else if (opcode == 61) {
+				definition.setCategory(buffer.readUShort());
 			} else if (opcode == 62) {
 				definition.setInverted(true);
 			} else if (opcode == 64) {
@@ -168,6 +168,18 @@ public class MyObjectDefinitionLoader extends ObjectDefinitionLoader {
 				definition.setMorphisms(morphisms);
 				definition.setVarbit(varbit);
 				definition.setVarp(varp);
+			} else if(opcode == 78) {//TODO Figure out what these do in OSRS
+				//First short = ambient sound
+				buffer.skip(3);
+			} else if(opcode == 79) {
+				buffer.skip(5);
+				int count = buffer.readByte();
+				buffer.skip(2 * count);
+			} else if(opcode == 81) {
+				buffer.skip(1);//Clip type?
+			} else if (opcode == 82) {
+				definition.setMinimapFunction(buffer.readUShort());//AreaType
+
 			} else if (opcode == 249) {
 				int count = buffer.readUByte();
 				for(int i = 0;i<count;i++) {

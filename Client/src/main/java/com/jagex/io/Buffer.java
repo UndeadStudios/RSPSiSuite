@@ -21,9 +21,7 @@ public final class Buffer {
 
 	/**
 	 * Creates the buffer with the specified payload.
-	 * 
-	 * @param payload
-	 *            The payload.
+	 *
 	 */
 	
 	public Buffer(ByteBuffer buffer) {
@@ -58,7 +56,15 @@ public final class Buffer {
 		writeByte(rsa.length);
 		writeBytes(rsa, 0, rsa.length);
 	}
-
+	public int get_short() {
+		position += 2;
+		int i = ((payload[position - 2] & 0xff) << 8)
+				+ (payload[position - 1] & 0xff);
+		if (i > 0x7fff) {
+			i -= 0x10000;
+		}
+		return i;
+	}
 	public int getBitPosition() {
 		return bitPosition;
 	}
@@ -180,7 +186,10 @@ public final class Buffer {
 
 		return value;
 	}
-
+	public int get_unsignedsmart_byteorshort() {
+		int peek = payload[position] & 0xFF;
+		return peek < 0x80 ? this.readUByte() : this.readUShort() - 0x8000;
+	}
 	public int readShort2() {
 		position += 2;
 		int value = ((payload[position - 2] & 0xff) << 8) + (payload[position - 1] & 0xff);
@@ -297,13 +306,20 @@ public final class Buffer {
 	public int readUSmartInt() {
 		int val = 0;
 		int lastVal = 0;
-		while((lastVal = readUSmart()) == 32767) {
+		while((lastVal = get_unsignedsmart_byteorshort()) == 32767) {
 			val += 32767;
 		}
 
 		return val + lastVal;
 	}
-
+	public int  getUIncrementalSmart() {
+		int value = 0, remainder;
+		for (remainder = get_unsignedsmart_byteorshort(); remainder == 32767; remainder = get_unsignedsmart_byteorshort()) {
+			value += 32767;
+		}
+		value += remainder;
+		return value;
+	}
 	public int readUTriByte() {
 		position += 3;
 		return ((payload[position - 3] & 0xff) << 16) + ((payload[position - 2] & 0xff) << 8)
