@@ -10,7 +10,8 @@ import com.rspsi.misc.Location;
 
 public class SceneTileData {
 
-	private byte overlayId = -1, underlayId = -1;
+	private short overlayId = -1;
+	private short underlayId = -1;
 	private byte overlayOrientation = -1, overlayType = -1;
 
 	private int tileHeight = -1;
@@ -152,7 +153,7 @@ public class SceneTileData {
 		return groundDecoId;
 	}
 
-	public byte getOverlayId() {
+	public short getOverlayId() {
 		return overlayId;
 	}
 
@@ -172,7 +173,7 @@ public class SceneTileData {
 		return tileHeight;
 	}
 
-	public byte getUnderlayId() {
+	public short getUnderlayId() {
 		return underlayId;
 	}
 
@@ -220,7 +221,7 @@ public class SceneTileData {
 		this.groundDecoId = groundDecoId;
 	}
 
-	public void setOverlayId(byte overlayId) {
+	public void setOverlayId(short overlayId) {
 		this.overlayId = overlayId;
 	}
 
@@ -240,7 +241,7 @@ public class SceneTileData {
 		this.tileHeight = tileHeight;
 	}
 
-	public void setUnderlayId(byte underlayId) {
+	public void setUnderlayId(short underlayId) {
 		this.underlayId = underlayId;
 	}
 
