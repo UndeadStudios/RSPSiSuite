@@ -678,7 +678,7 @@ public final class Client implements Runnable {
 		mapRegion = new MapRegion(sceneGraph, 64 * (chunkXLength), 64 * (chunkYLength));
 		mapRegion.tileHeights[0] = heights;
 		for(int x = 0;x<mapRegion.underlays[0].length;x++)
-			Arrays.fill(mapRegion.underlays[0][x], (byte)1);
+			Arrays.fill(mapRegion.underlays[0][x], (short)1);
 		for(int x = 0;x<mapRegion.manualTileHeight[0].length;x++)
 			Arrays.fill(mapRegion.manualTileHeight[0][x], (byte)1);
 		mapRegion.setHeights();

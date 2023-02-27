@@ -153,8 +153,8 @@ public class ObjectDefinitionLoaderOSRS extends ObjectDefinitionLoader {
 				}
 				definition.setRetextureToFind(originalTex);
 				definition.setTextureToReplace(replacementTex);
-			} else if (opcode == 60) {
-				//definition.setMinimapFunction(buffer.readUShort());
+			} else if (opcode == 61) {
+				definition.setCategory(buffer.readUShort());
 			} else if (opcode == 62) {
 				definition.setInverted(true);
 			} else if (opcode == 64) {

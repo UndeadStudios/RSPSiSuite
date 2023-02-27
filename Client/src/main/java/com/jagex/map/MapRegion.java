@@ -512,7 +512,7 @@ public final class MapRegion {
 		}
 
 		do {
-			int in = buffer.readUByte();
+			int in = buffer.readUShort();
 			if (in == 0) {
 				break;
 			} else if (in == 1) {
@@ -1670,7 +1670,7 @@ public final class MapRegion {
 												int saturation = floor.getSaturation();
 												int luminance = floor.getLuminance();
 												hsl_bitset_unmodified = ColourUtils.toHsl(hue, saturation, luminance);
-												hue = hue + hueOffset & 0x3FFF;
+												hue = hue + hueOffset & 255;
 												luminance += luminanceOffset;
 
 												if (luminance < 0) {
@@ -2087,7 +2087,7 @@ public final class MapRegion {
 												int saturation = floor.getSaturation();
 												int luminance = floor.getLuminance();
 												hsl_bitset_unmodified = ColourUtils.toHsl(hue, saturation, luminance);
-												hue = hue + hueOffset & 0x3FFF;
+												hue = hue + hueOffset & 255;
 												luminance += luminanceOffset;
 
 												if (luminance < 0) {

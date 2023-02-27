@@ -32,7 +32,7 @@ public class GameRasterizer extends GameRaster {
 	 public int[] camera_vertex_x = new int[4096];
 	 public int[] camera_vertex_y = new int[4096];
 	 public int[] camera_vertex_z = new int[4096];
-	 public int[] depthListIndices = new int[1500];
+	 public int[] depthListIndices = new int[8000];
 	 public int[] anIntArray1673 = new int[12];
 	 public int[] anIntArray1675 = new int[2000];
 	 public int[] anIntArray1676 = new int[2000];

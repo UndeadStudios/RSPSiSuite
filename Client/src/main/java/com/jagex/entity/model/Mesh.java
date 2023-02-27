@@ -858,203 +858,205 @@ public class Mesh extends Renderable {
     private static ObjectKey activeKey;
 
     private void renderFaces(GameRasterizer rasterizer, boolean flag, boolean multiTileFlag, ObjectKey key, int z) {
-        for (int j = 0; j < boundingSphereRadius; j++) {
-            rasterizer.depthListIndices[j] = 0;
-        }
+        if(boundingSphereRadius < 1600) {
+            for (int j = 0; j < boundingSphereRadius; j++) {
+                rasterizer.depthListIndices[j] = 0;
+            }
 
-        activeKey = key;
+            activeKey = key;
 
-        for (int face = 0; face < triangleCount; face++) {
-            if (triangleInfo == null || triangleInfo[face] != -1) {
-                int indexX = faceIndices1[face];
-                int indexY = faceIndices2[face];
-                int indexZ = faceIndices3[face];
-                int i3 = rasterizer.vertexScreenX[indexX];
-                int l3 = rasterizer.vertexScreenX[indexY];
-                int k4 = rasterizer.vertexScreenX[indexZ];
+            for (int face = 0; face < triangleCount; face++) {
+                if (triangleInfo == null || triangleInfo[face] != -1) {
+                    int indexX = faceIndices1[face];
+                    int indexY = faceIndices2[face];
+                    int indexZ = faceIndices3[face];
+                    int i3 = rasterizer.vertexScreenX[indexX];
+                    int l3 = rasterizer.vertexScreenX[indexY];
+                    int k4 = rasterizer.vertexScreenX[indexZ];
 
-                if (flag && (i3 == -5000 || l3 == -5000 || k4 == -5000)) {
-                    rasterizer.cullFacesOther[face] = true;
-                    int j5 = (rasterizer.vertexScreenZ[indexX] + rasterizer.vertexScreenZ[indexY] + rasterizer.vertexScreenZ[indexZ]) / 3
-                            + boundingCylinderRadius;
-                    rasterizer.faceList[j5][rasterizer.depthListIndices[j5]++] = face;
-                } else {
-                    if (key != null && multiTileFlag) {
-                        if (insideTriangle(mouseX, mouseY, rasterizer.vertexScreenY[indexX], rasterizer.vertexScreenY[indexY],
-                                rasterizer.vertexScreenY[indexZ], i3, l3, k4)) {
+                    if (flag && (i3 == -5000 || l3 == -5000 || k4 == -5000)) {
+                        rasterizer.cullFacesOther[face] = true;
+                        int j5 = (rasterizer.vertexScreenZ[indexX] + rasterizer.vertexScreenZ[indexY] + rasterizer.vertexScreenZ[indexZ]) / 3
+                                + boundingCylinderRadius;
+                        rasterizer.faceList[j5][rasterizer.depthListIndices[j5]++] = face;
+                    } else {
+                        if (key != null && multiTileFlag) {
+                            if (insideTriangle(mouseX, mouseY, rasterizer.vertexScreenY[indexX], rasterizer.vertexScreenY[indexY],
+                                    rasterizer.vertexScreenY[indexZ], i3, l3, k4)) {
 
 
-                            boolean correctTool = (Options.currentTool.get() == ToolType.SELECT_OBJECT || Options.currentTool.get() == ToolType.DELETE_OBJECT);
-                            if (Options.currentHeight.get() == z && correctTool) {
-                                int type = key.getType();
+                                boolean correctTool = (Options.currentTool.get() == ToolType.SELECT_OBJECT || Options.currentTool.get() == ToolType.DELETE_OBJECT);
+                                if (Options.currentHeight.get() == z && correctTool) {
+                                    int type = key.getType();
 
-                                int selectionType = Options.objectSelectionType.get() - 1;
-                                if (selectionType == -1 || type == selectionType) {
-                                    resourceIDTag[resourceCount++] = key;// ObjectKey.closestToCamera(Client.hoveredUID, key, Client.getSingleton().xCameraPos, Client.getSingleton().yCameraPos, Client.getSingleton().zCameraPos);
-                                    if (Client.hoveredUID == null)
-                                        Client.hoveredUID = key;
+                                    int selectionType = Options.objectSelectionType.get() - 1;
+                                    if (selectionType == -1 || type == selectionType) {
+                                        resourceIDTag[resourceCount++] = key;// ObjectKey.closestToCamera(Client.hoveredUID, key, Client.getSingleton().xCameraPos, Client.getSingleton().yCameraPos, Client.getSingleton().zCameraPos);
+                                        if (Client.hoveredUID == null)
+                                            Client.hoveredUID = key;
+                                    }
                                 }
-                            }
 
-                            multiTileFlag = false;
-                        } else if (Objects.equals(Client.hoveredUID, key)) {
-                            Client.hoveredUID = null;
+                                multiTileFlag = false;
+                            } else if (Objects.equals(Client.hoveredUID, key)) {
+                                Client.hoveredUID = null;
+                            }
+                        }
+
+                        translucent = false;
+                        //translucent = false;
+                        if (key != null) {
+                            if (Options.currentTool.get() == ToolType.SELECT_OBJECT
+                                    || Options.currentTool.get() == ToolType.DELETE_OBJECT)
+                                translucent = Objects.equals(Client.hoveredUID, key) && z == Options.currentHeight.get();
+                            else
+                                translucent = false;
+                        }
+                        if ((i3 - l3) * (rasterizer.vertexScreenY[indexZ] - rasterizer.vertexScreenY[indexY])
+                                - (rasterizer.vertexScreenY[indexX] - rasterizer.vertexScreenY[indexY]) * (k4 - l3) > 0) {
+                            rasterizer.cullFacesOther[face] = false;
+                            rasterizer.cullFaces[face] = i3 < 0 || l3 < 0 || k4 < 0 || i3 > rasterizer.getMaxRight() || l3 > rasterizer.getMaxRight()
+                                    || k4 > rasterizer.getMaxRight();
+                            int k5 = (rasterizer.vertexScreenZ[indexX] + rasterizer.vertexScreenZ[indexY] + rasterizer.vertexScreenZ[indexZ]) / 3
+                                    + boundingCylinderRadius;
+                            if (k5 >= 0 && k5 < rasterizer.faceList.length)
+                                rasterizer.faceList[k5][rasterizer.depthListIndices[k5]++] = face;
+                        }
+                    }
+                }
+            }
+
+            if (faceRenderPriorities == null) {
+                for (int i1 = boundingSphereRadius - 1; i1 >= 0; i1--) {
+                    int l1 = rasterizer.depthListIndices[i1];
+                    if (l1 > 0) {
+                        int[] ai = rasterizer.faceList[i1];
+                        for (int j3 = 0; j3 < l1; j3++) {
+                            renderFace(rasterizer, ai[j3]);
+                        }
+                    }
+                }
+
+                return;
+            }
+            for (int j1 = 0; j1 < 12; j1++) {
+                rasterizer.anIntArray1673[j1] = 0;
+                rasterizer.anIntArray1677[j1] = 0;
+            }
+
+            for (int i2 = boundingSphereRadius - 1; i2 >= 0; i2--) {
+                int k2 = rasterizer.depthListIndices[i2];
+                if (k2 > 0) {
+                    int[] ai1 = rasterizer.faceList[i2];
+                    for (int i4 = 0; i4 < k2; i4++) {
+                        int l4 = ai1[i4];
+                        int l5 = faceRenderPriorities[l4];
+                        int j6 = rasterizer.anIntArray1673[l5]++;
+                        rasterizer.anIntArrayArray1674[l5][j6] = l4;
+                        if (l5 < 10) {
+                            rasterizer.anIntArray1677[l5] += i2;
+                        } else if (l5 == 10) {
+                            rasterizer.anIntArray1675[j6] = i2;
+                        } else {
+                            rasterizer.anIntArray1676[j6] = i2;
                         }
                     }
 
-                    translucent = false;
-                    //translucent = false;
-                    if (key != null) {
-                        if (Options.currentTool.get() == ToolType.SELECT_OBJECT
-                                || Options.currentTool.get() == ToolType.DELETE_OBJECT)
-                            translucent = Objects.equals(Client.hoveredUID, key) && z == Options.currentHeight.get();
-                        else
-                            translucent = false;
-                    }
-                    if ((i3 - l3) * (rasterizer.vertexScreenY[indexZ] - rasterizer.vertexScreenY[indexY])
-                            - (rasterizer.vertexScreenY[indexX] - rasterizer.vertexScreenY[indexY]) * (k4 - l3) > 0) {
-                        rasterizer.cullFacesOther[face] = false;
-                        rasterizer.cullFaces[face] = i3 < 0 || l3 < 0 || k4 < 0 || i3 > rasterizer.getMaxRight() || l3 > rasterizer.getMaxRight()
-                                || k4 > rasterizer.getMaxRight();
-                        int k5 = (rasterizer.vertexScreenZ[indexX] + rasterizer.vertexScreenZ[indexY] + rasterizer.vertexScreenZ[indexZ]) / 3
-                                + boundingCylinderRadius;
-                        if (k5 >= 0 && k5 < rasterizer.faceList.length)
-                            rasterizer.faceList[k5][rasterizer.depthListIndices[k5]++] = face;
-                    }
-                }
-            }
-        }
-
-        if (faceRenderPriorities == null) {
-            for (int i1 = boundingSphereRadius - 1; i1 >= 0; i1--) {
-                int l1 = rasterizer.depthListIndices[i1];
-                if (l1 > 0) {
-                    int[] ai = rasterizer.faceList[i1];
-                    for (int j3 = 0; j3 < l1; j3++) {
-                        renderFace(rasterizer, ai[j3]);
-                    }
                 }
             }
 
-            return;
-        }
-        for (int j1 = 0; j1 < 12; j1++) {
-            rasterizer.anIntArray1673[j1] = 0;
-            rasterizer.anIntArray1677[j1] = 0;
-        }
-
-        for (int i2 = boundingSphereRadius - 1; i2 >= 0; i2--) {
-            int k2 = rasterizer.depthListIndices[i2];
-            if (k2 > 0) {
-                int[] ai1 = rasterizer.faceList[i2];
-                for (int i4 = 0; i4 < k2; i4++) {
-                    int l4 = ai1[i4];
-                    int l5 = faceRenderPriorities[l4];
-                    int j6 = rasterizer.anIntArray1673[l5]++;
-                    rasterizer.anIntArrayArray1674[l5][j6] = l4;
-                    if (l5 < 10) {
-                        rasterizer.anIntArray1677[l5] += i2;
-                    } else if (l5 == 10) {
-                        rasterizer.anIntArray1675[j6] = i2;
-                    } else {
-                        rasterizer.anIntArray1676[j6] = i2;
-                    }
-                }
-
+            int l2 = 0;
+            if (rasterizer.anIntArray1673[1] > 0 || rasterizer.anIntArray1673[2] > 0) {
+                l2 = (rasterizer.anIntArray1677[1] + rasterizer.anIntArray1677[2]) / (rasterizer.anIntArray1673[1] + rasterizer.anIntArray1673[2]);
             }
-        }
-
-        int l2 = 0;
-        if (rasterizer.anIntArray1673[1] > 0 || rasterizer.anIntArray1673[2] > 0) {
-            l2 = (rasterizer.anIntArray1677[1] + rasterizer.anIntArray1677[2]) / (rasterizer.anIntArray1673[1] + rasterizer.anIntArray1673[2]);
-        }
-        int k3 = 0;
-        if (rasterizer.anIntArray1673[3] > 0 || rasterizer.anIntArray1673[4] > 0) {
-            k3 = (rasterizer.anIntArray1677[3] + rasterizer.anIntArray1677[4]) / (rasterizer.anIntArray1673[3] + rasterizer.anIntArray1673[4]);
-        }
-        int j4 = 0;
-        if (rasterizer.anIntArray1673[6] > 0 || rasterizer.anIntArray1673[8] > 0) {
-            j4 = (rasterizer.anIntArray1677[6] + rasterizer.anIntArray1677[8]) / (rasterizer.anIntArray1673[6] + rasterizer.anIntArray1673[8]);
-        }
-        int i6 = 0;
-        int k6 = rasterizer.anIntArray1673[10];
-        int[] ai2 = rasterizer.anIntArrayArray1674[10];
-        int[] ai3 = rasterizer.anIntArray1675;
-        if (i6 == k6) {
-            i6 = 0;
-            k6 = rasterizer.anIntArray1673[11];
-            ai2 = rasterizer.anIntArrayArray1674[11];
-            ai3 = rasterizer.anIntArray1676;
-        }
-        int i5;
-        if (i6 < k6) {
-            i5 = ai3[i6];
-        } else {
-            i5 = -1000;
-        }
-        for (int l6 = 0; l6 < 10; l6++) {
-            while (l6 == 0 && i5 > l2) {
-                renderFace(rasterizer, ai2[i6++]);
-                if (i6 == k6 && ai2 != rasterizer.anIntArrayArray1674[11]) {
-                    i6 = 0;
-                    k6 = rasterizer.anIntArray1673[11];
-                    ai2 = rasterizer.anIntArrayArray1674[11];
-                    ai3 = rasterizer.anIntArray1676;
-                }
-                if (i6 < k6) {
-                    i5 = ai3[i6];
-                } else {
-                    i5 = -1000;
-                }
+            int k3 = 0;
+            if (rasterizer.anIntArray1673[3] > 0 || rasterizer.anIntArray1673[4] > 0) {
+                k3 = (rasterizer.anIntArray1677[3] + rasterizer.anIntArray1677[4]) / (rasterizer.anIntArray1673[3] + rasterizer.anIntArray1673[4]);
             }
-            while (l6 == 3 && i5 > k3) {
-                renderFace(rasterizer, ai2[i6++]);
-                if (i6 == k6 && ai2 != rasterizer.anIntArrayArray1674[11]) {
-                    i6 = 0;
-                    k6 = rasterizer.anIntArray1673[11];
-                    ai2 = rasterizer.anIntArrayArray1674[11];
-                    ai3 = rasterizer.anIntArray1676;
-                }
-                if (i6 < k6) {
-                    i5 = ai3[i6];
-                } else {
-                    i5 = -1000;
-                }
+            int j4 = 0;
+            if (rasterizer.anIntArray1673[6] > 0 || rasterizer.anIntArray1673[8] > 0) {
+                j4 = (rasterizer.anIntArray1677[6] + rasterizer.anIntArray1677[8]) / (rasterizer.anIntArray1673[6] + rasterizer.anIntArray1673[8]);
             }
-            while (l6 == 5 && i5 > j4) {
-                renderFace(rasterizer, ai2[i6++]);
-                if (i6 == k6 && ai2 != rasterizer.anIntArrayArray1674[11]) {
-                    i6 = 0;
-                    k6 = rasterizer.anIntArray1673[11];
-                    ai2 = rasterizer.anIntArrayArray1674[11];
-                    ai3 = rasterizer.anIntArray1676;
-                }
-                if (i6 < k6) {
-                    i5 = ai3[i6];
-                } else {
-                    i5 = -1000;
-                }
-            }
-            int i7 = rasterizer.anIntArray1673[l6];
-            int[] ai4 = rasterizer.anIntArrayArray1674[l6];
-            for (int j7 = 0; j7 < i7; j7++) {
-                renderFace(rasterizer, ai4[j7]);
-            }
-
-        }
-
-        while (i5 != -1000) {
-            renderFace(rasterizer, ai2[i6++]);
-            if (i6 == k6 && ai2 != rasterizer.anIntArrayArray1674[11]) {
+            int i6 = 0;
+            int k6 = rasterizer.anIntArray1673[10];
+            int[] ai2 = rasterizer.anIntArrayArray1674[10];
+            int[] ai3 = rasterizer.anIntArray1675;
+            if (i6 == k6) {
                 i6 = 0;
-                ai2 = rasterizer.anIntArrayArray1674[11];
                 k6 = rasterizer.anIntArray1673[11];
+                ai2 = rasterizer.anIntArrayArray1674[11];
                 ai3 = rasterizer.anIntArray1676;
             }
+            int i5;
             if (i6 < k6) {
                 i5 = ai3[i6];
             } else {
                 i5 = -1000;
+            }
+            for (int l6 = 0; l6 < 10; l6++) {
+                while (l6 == 0 && i5 > l2) {
+                    renderFace(rasterizer, ai2[i6++]);
+                    if (i6 == k6 && ai2 != rasterizer.anIntArrayArray1674[11]) {
+                        i6 = 0;
+                        k6 = rasterizer.anIntArray1673[11];
+                        ai2 = rasterizer.anIntArrayArray1674[11];
+                        ai3 = rasterizer.anIntArray1676;
+                    }
+                    if (i6 < k6) {
+                        i5 = ai3[i6];
+                    } else {
+                        i5 = -1000;
+                    }
+                }
+                while (l6 == 3 && i5 > k3) {
+                    renderFace(rasterizer, ai2[i6++]);
+                    if (i6 == k6 && ai2 != rasterizer.anIntArrayArray1674[11]) {
+                        i6 = 0;
+                        k6 = rasterizer.anIntArray1673[11];
+                        ai2 = rasterizer.anIntArrayArray1674[11];
+                        ai3 = rasterizer.anIntArray1676;
+                    }
+                    if (i6 < k6) {
+                        i5 = ai3[i6];
+                    } else {
+                        i5 = -1000;
+                    }
+                }
+                while (l6 == 5 && i5 > j4) {
+                    renderFace(rasterizer, ai2[i6++]);
+                    if (i6 == k6 && ai2 != rasterizer.anIntArrayArray1674[11]) {
+                        i6 = 0;
+                        k6 = rasterizer.anIntArray1673[11];
+                        ai2 = rasterizer.anIntArrayArray1674[11];
+                        ai3 = rasterizer.anIntArray1676;
+                    }
+                    if (i6 < k6) {
+                        i5 = ai3[i6];
+                    } else {
+                        i5 = -1000;
+                    }
+                }
+                int i7 = rasterizer.anIntArray1673[l6];
+                int[] ai4 = rasterizer.anIntArrayArray1674[l6];
+                for (int j7 = 0; j7 < i7; j7++) {
+                    renderFace(rasterizer, ai4[j7]);
+                }
+
+            }
+
+            while (i5 != -1000) {
+                renderFace(rasterizer, ai2[i6++]);
+                if (i6 == k6 && ai2 != rasterizer.anIntArrayArray1674[11]) {
+                    i6 = 0;
+                    ai2 = rasterizer.anIntArrayArray1674[11];
+                    k6 = rasterizer.anIntArray1673[11];
+                    ai3 = rasterizer.anIntArray1676;
+                }
+                if (i6 < k6) {
+                    i5 = ai3[i6];
+                } else {
+                    i5 = -1000;
+                }
             }
         }
     }

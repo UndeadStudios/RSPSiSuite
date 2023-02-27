@@ -126,15 +126,15 @@ public class MapView extends JFrame {
 		RegionViewMouseListener listener = new RegionViewMouseListener();
 		System.out.println("INIT TILES 1");
 
-		jPanel.setPreferredSize(new Dimension(150 * 64 + 1, 150 * 64 + 1));
+		jPanel.setPreferredSize(new Dimension(256 * 64 + 1, 256 * 64 + 1));
 		jPanel.revalidate();
 		Thread t = new Thread(() -> {
-			for(int y = 150;y>=0;y--) {
-				for(int x = 0;x<150;x++) {
+			for(int y = 256;y>=0;y--) {
+				for(int x = 0;x<256;x++) {
 					RegionView r = new RegionView(x, y);
 					r.addMouseListener(listener);
 					r.setSize(new Dimension(64, 64));
-					r.setLocation(new Point(x * 64, (64 * 149) - y * 64));//Swapped for horizontal view
+					r.setLocation(new Point(x * 64, (64 * 255) - y * 64));//Swapped for horizontal view
 					r.setVisible(true);
 					jPanel.add(r);
 					
