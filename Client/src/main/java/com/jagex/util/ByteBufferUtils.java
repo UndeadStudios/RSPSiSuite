@@ -91,6 +91,9 @@ public final class ByteBufferUtils {
 		else
 			return (buf.getShort() & 0xFFFF) - 49152;
 	}
+	public static int getunsignedshort(ByteBuffer buf){
+		return (buf.getShort()& 0xFFFF);
+	}
 
 	/**
 	 * Gets a smart integer from the buffer.

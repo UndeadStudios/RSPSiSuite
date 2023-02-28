@@ -1671,17 +1671,17 @@ public class SceneGraph {
 										((TileChange<OverlayState>) currentState.get()).preserveTileState(tileState);
 									}
 									if (Options.overlayPaintShapeId.get() == 0 || KeyBindings.actionValid(KeyActions.OVERLAY_REMOVE)) {
-										this.getMapRegion().overlays[plane][absX][absY] = (byte) 0;
+										this.getMapRegion().overlays[plane][absX][absY] = (short) 0;
 									} else {
 										if (!KeyBindings.actionValid(KeyActions.OVERLAY_ONLY_PAINT)) {
-											this.getMapRegion().overlays[plane][absX][absY] = (byte) Options.overlayPaintId
+											this.getMapRegion().overlays[plane][absX][absY] = (short) Options.overlayPaintId
 													.get();
 											this.getMapRegion().overlayShapes[plane][absX][absY] = (byte) (Options.overlayPaintShapeId
 													.get() - 1);
 											this.getMapRegion().overlayOrientations[plane][absX][absY] = (byte) Options.rotation.get();
 										} else {
 											if (this.getMapRegion().overlays[plane][absX][absY] > 0) {
-												this.getMapRegion().overlays[plane][absX][absY] = (byte) Options.overlayPaintId
+												this.getMapRegion().overlays[plane][absX][absY] = (short) Options.overlayPaintId
 														.get();
 											}
 										}
@@ -1693,7 +1693,7 @@ public class SceneGraph {
 										tileState.preserve();
 										((TileChange<UnderlayState>) currentState.get()).preserveTileState(tileState);
 									}
-									this.getMapRegion().underlays[plane][absX][absY] = (byte) Options.underlayPaintId
+									this.getMapRegion().underlays[plane][absX][absY] = (short) Options.underlayPaintId
 											.get();
 									this.tiles[plane][absX][absY].hasUpdated = true;
 								}
@@ -4879,7 +4879,7 @@ public class SceneGraph {
 				tileState.preserve();
 				((TileChange<UnderlayState>) currentState.get()).preserveTileState(tileState);
 			}
-			this.getMapRegion().underlays[plane][x][y] = (byte) Options.underlayPaintId.get();
+			this.getMapRegion().underlays[plane][x][y] = (short) Options.underlayPaintId.get();
 			this.tiles[plane][x][y].hasUpdated = true;
 
 		});
@@ -4907,9 +4907,9 @@ public class SceneGraph {
 				((TileChange<OverlayState>) currentState.get()).preserveTileState(tileState);
 			}
 			if (Options.overlayPaintShapeId.get() == 0) {
-				this.getMapRegion().overlays[plane][x][y] = (byte) 0;
+				this.getMapRegion().overlays[plane][x][y] = (short) 0;
 			} else {
-				this.getMapRegion().overlays[plane][x][y] = (byte) Options.overlayPaintId
+				this.getMapRegion().overlays[plane][x][y] = (short) Options.overlayPaintId
 						.get();
 				this.getMapRegion().overlayShapes[plane][x][y] = (byte) (Options.overlayPaintShapeId
 						.get() - 1);

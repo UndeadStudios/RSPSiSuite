@@ -6,6 +6,7 @@ import java.util.Map;
 import com.jagex.Client;
 import com.jagex.cache.def.RSArea;
 import com.jagex.cache.loader.config.RSAreaLoader;
+import com.jagex.util.ByteBufferUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jagex.cache.def.Floor;
@@ -399,14 +400,14 @@ public final class MapRegion {
 				for (int localX = 0; localX < 64; localX++) {
 					for (int localY = 0; localY < 64; localY++) {
 						do {
-							int in = buffer.readUByte();
+							int in = buffer.readUShort();
 							if (in == 0) {
 								break;
 							} else if (in == 1) {
 								buffer.readUByte();
 								break;
 							} else if (in <= 49) {
-								buffer.readUByte();
+								buffer.get_short();
 							}
 						} while (true);
 					}
@@ -1114,24 +1115,24 @@ public final class MapRegion {
 
 	private void save_terrain_tile(int y, int x, int z, Buffer buffer) {
 		if (overlays[y][x][z] != 0) {
-			buffer.writeByte(overlayShapes[y][x][z] * 4 + (overlayOrientations[y][x][z] & 3) + 2);
+			buffer.writeShort(overlayShapes[y][x][z] * 4 + (overlayOrientations[y][x][z] & 3) + 2);
 			buffer.writeShort(overlays[y][x][z]);
 		}
 		if (tileFlags[y][x][z] != 0) {
-			buffer.writeByte(tileFlags[y][x][z] + 49);
+			buffer.writeShort(tileFlags[y][x][z] + 49);
 		}
 		if (underlays[y][x][z] != 0) {
 			buffer.writeShort(underlays[y][x][z] + 81);
 		}
 		if (manualTileHeight[y][x][z] == 1 || y == 0) {
-			buffer.writeByte(1);
+			buffer.writeShort(1);
 			if (y == 0) {
 				buffer.writeByte(-tileHeights[y][x][z] / 8);
 			} else {
 				buffer.writeByte(-(tileHeights[y][x][z] - tileHeights[y - 1][x][z]) / 8);
 			}
 		} else {
-			buffer.writeByte(0);
+			buffer.writeShort(0);
 		}
 	}
 
