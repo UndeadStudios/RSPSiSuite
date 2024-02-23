@@ -214,9 +214,9 @@ public class ObjectDefinitionLoaderOSRS extends ObjectDefinitionLoader {
 				definition.setVarp(varp);
 			} else if (opcode == 78) {//TODO Figure out what these do in OSRS
 				//First short = ambient sound
-				buffer.skip(3);
+				buffer.skip(4);
 			} else if (opcode == 79) {
-				buffer.skip(5);
+				buffer.skip(6);
 				int count = buffer.readUByte();
 				buffer.skip(2 * count);
 			} else if (opcode == 81) {
