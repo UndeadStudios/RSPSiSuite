@@ -40,39 +40,6 @@ public final class MapRegion {
 	public static int maximumPlane = 99;
 	private static final int[] SINE_VERTICIES = { 0, -1, 0, 1 };
 
-	private static int calculateHeight(int x, int y) {
-		int height = interpolatedNoise(x + 45365, y + 0x16713, 4) - 128
-				+ (interpolatedNoise(x + 10294, y + 37821, 2) - 128 >> 1) + (interpolatedNoise(x, y, 1) - 128 >> 2);
-		height = (int) (height * 0.3D) + 35;
-
-		if (height < 10) {
-			height = 10;
-		} else if (height > 60) {
-			height = 60;
-		}
-
-		return height;
-	}
-
-	private static int interpolate(int a, int b, int angle, int frequencyReciprocal) {
-		int cosine = 0x10000 - Constants.COSINE[angle * 1024 / frequencyReciprocal] >> 1;
-		return (a * (0x10000 - cosine) >> 16) + (b * cosine >> 16);
-	}
-
-	private static int interpolatedNoise(int x, int y, int frequencyReciprocal) {
-		int adj_x = x / frequencyReciprocal;
-		int i1 = x & frequencyReciprocal - 1;
-		int adj_y = y / frequencyReciprocal;
-		int k1 = y & frequencyReciprocal - 1;
-		int l1 = smoothNoise(adj_x, adj_y);
-		int i2 = smoothNoise(adj_x + 1, adj_y);
-		int j2 = smoothNoise(adj_x, adj_y + 1);
-		int k2 = smoothNoise(adj_x + 1, adj_y + 1);
-		int l2 = interpolate(l1, i2, i1, frequencyReciprocal);
-		int i3 = interpolate(j2, k2, i1, frequencyReciprocal);
-		return interpolate(l2, i3, k1, frequencyReciprocal);
-	}
-
 	public static int light(int colour, int light) {
 		if (colour == -1)
 			return 0xbc614e;
@@ -242,20 +209,6 @@ public final class MapRegion {
 		}
 	}
 
-	private static int perlinNoise(int x, int y) {
-		int n = x + y * 57;
-		n = n << 13 ^ n;
-		n = n * (n * n * 15731 + 0xc0ae5) + 0x5208dd0d & 0x7fffffff;
-		return n >> 19 & 0xff;
-	}
-
-	private static int smoothNoise(int x, int y) {
-		int corners = perlinNoise(x - 1, y - 1) + perlinNoise(x + 1, y - 1) + perlinNoise(x - 1, y + 1)
-				+ perlinNoise(x + 1, y + 1);
-		int sides = perlinNoise(x - 1, y) + perlinNoise(x + 1, y) + perlinNoise(x, y - 1) + perlinNoise(x, y + 1);
-		int center = perlinNoise(x, y);
-		return corners / 16 + sides / 8 + center / 4;
-	}
 
 	private int hueOffset = -8;
 
@@ -471,7 +424,36 @@ public final class MapRegion {
 			} while (true);
 		}
 	}
-
+	private static int interpolatedNoise(int x, int y, int frequencyReciprocal) {
+		int l = x / frequencyReciprocal;
+		int i1 = x & frequencyReciprocal - 1;
+		int j1 = y / frequencyReciprocal;
+		int k1 = y & frequencyReciprocal - 1;
+		int l1 = smoothNoise(l, j1);
+		int i2 = smoothNoise(l + 1, j1);
+		int j2 = smoothNoise(l, j1 + 1);
+		int k2 = smoothNoise(l + 1, j1 + 1);
+		int l2 = interpolate(l1, i2, i1, frequencyReciprocal);
+		int i3 = interpolate(j2, k2, i1, frequencyReciprocal);
+		return interpolate(l2, i3, k1, frequencyReciprocal);
+	}
+	private static int interpolate(int a, int b, int angle, int frequencyReciprocal) {
+		int[] Rasterizer3D_COSINE = new int[2048];
+		int cosine = 0x10000 - Rasterizer3D_COSINE[(angle * 1024) / frequencyReciprocal] >> 1;
+		return (a * (0x10000 - cosine) >> 16) + (b * cosine >> 16);
+	}
+	private static int smoothNoise(int x, int y) {
+		int corners = calculateNoise(x - 1, y - 1) + calculateNoise(x + 1, y - 1) + calculateNoise(x - 1, y + 1) + calculateNoise(x + 1, y + 1);
+		int sides = calculateNoise(x - 1, y) + calculateNoise(x + 1, y) + calculateNoise(x, y - 1) + calculateNoise(x, y + 1);
+		int center = calculateNoise(x, y);
+		return corners / 16 + sides / 8 + center / 4;
+	}
+	private static int calculateNoise(int x, int y) {
+		int k = x + y * 57;
+		k = k << 13 ^ k;
+		int l = k * (k * k * 15731 + 0xc0ae5) + 0x5208dd0d & 0x7fffffff;
+		return l >> 19 & 0xff;
+	}
 	public final void decodeMapData(Buffer buffer, int x, int y, int z, int regionX, int regionY, int orientation) {// XXX
 		if (x >= 0 && x < width && y >= 0 && y < length) {
 			tileFlags[z][x][y] = 0;
@@ -481,7 +463,14 @@ public final class MapRegion {
 				if (type == 0) {
 					manualTileHeight[z][x][y] = 0;
 					if (z == 0) {
-						tileHeights[0][x][y] = -calculateHeight(0xe3b7b + x + regionX, 0x87cce + y + regionY) * 8;
+						int baseHeight = interpolatedNoise(x + 932731, y + 556238, 4) - 128 + (interpolatedNoise(10294 + x + 932731, y + 556238, 2) - 128 >> 1) + (interpolatedNoise(x + 932731, y + 556238, 1) - 128 >> 2);
+						baseHeight = (int)((double)baseHeight * 0.3D) + 35;
+						if (baseHeight < 10) {
+							baseHeight = 10;
+						} else if (baseHeight > 60) {
+							baseHeight = 60;
+						}
+						tileHeights[0][x][y] = -baseHeight * 8;
 					} else {
 						tileHeights[z][x][y] = tileHeights[z - 1][x][y] - 240;
 					}
